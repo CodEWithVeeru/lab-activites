@@ -1,0 +1,63 @@
+#Find_S
+import pandas as pd
+data=pd.read_csv('/content/Find-s_dataset - Sheet1.csv')
+print(data)
+def find_s_algorithm (data):
+	attributes = data.iloc[:, :-1].values
+	target = data.iloc[:, -1].values
+	for i in range (len (target)):
+		if target[i] == 'Yes':
+			hypothesis = attributes[i].copy ()
+			break
+	for i in range (len (target)):
+		if target[i] == 'Yes':
+			for j in range (len (hypothesis)):
+				if hypothesis[j] != attributes[i][j]:
+					hypothesis[j] = '?'
+	return hypothesis
+  print("Most Specific Hypothesis:",find_s_algorithm(data))
+
+
+#Candidate algorithm
+
+def consistent(h, x):
+    return all(hv == "?" or hv == xv for hv, xv in zip(h, x))
+
+def candidate_elimination(concepts, target):
+    S = concepts[0].copy()                 # Start with most specific
+    G = [["?" for _ in S]]                 # Start with most general
+
+    for inst, label in zip(concepts, target):
+
+        if label == "Yes":                 # Positive example
+            S = ["?" if s != i else s for s, i in zip(S, inst)]
+            G = [g for g in G if consistent(g, inst)]
+
+        else:                              # Negative example
+            new_G = []
+            for g in G:
+                for i in range(len(g)):
+                    if g[i] != inst[i]:
+                        h = g.copy()
+                        h[i] = S[i]
+                        new_G.append(h)
+
+            G = [h for h in new_G if not consistent(h, inst)]
+
+    return S, G
+
+# Training data
+concepts = [
+    ["Sunny","Warm","Normal","Strong"],
+    ["Sunny","Warm","High","Strong"],
+    ["Rainy","Cold","High","Strong"],
+    ["Sunny","Warm","High","Weak"],
+    ["Cloudy","Warm","High","Weak"],
+]
+
+target = ["Yes","Yes","No","Yes","No"]
+
+S, G = candidate_elimination(concepts, target)
+
+print("Final S:", S)
+print("Final G:", G)
