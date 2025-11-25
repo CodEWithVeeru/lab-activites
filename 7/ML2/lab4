@@ -1,0 +1,28 @@
+import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import matplotlib.pyplot as plt
+
+X,_=load_iris(return_X_y=True,as_frame=True)
+
+X_Scaled=StandardScaler().fit_transform(X)
+
+kmeans=KMeans(n_clusters=3,n_init=10,random_state=42)
+labels=kmeans.fit_predict(X_Scaled)
+
+fig=plt.figure(figsize=(5,5))
+ax=fig.add_subplot(111,projection='3d')
+ax.scatter(X_Scaled[:,0],X_Scaled[:,1],X_Scaled[:,2],c=labels,cmap='viridis',s=50)
+ax.scatter(kmeans.cluster_centers_[:,0],kmeans.cluster_centers_[:,1],kmeans.cluster_centers_[:,2],c='red',marker='X',s=200,label='Centroids')
+ax.set_title("K-Means Clustering on Unlabeled Iris data(3D view)")
+ax.set_xlabel("Feature 1")
+ax.set_ylabel("Feature 2")
+ax.set_zlabel("Feature 3")
+ax.legend()
+plt.show()
+
+sil=silhouette_score(X_Scaled,labels)
+print("Silhouette Score:",sil)
+print("Cluster Centers(in scaled space):\n",kmeans.cluster_centers_)
